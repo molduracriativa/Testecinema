@@ -1,265 +1,151 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Convite Interativo</title>
 
 <style>
-  :root{
-    --accent: #c0134f;
-    --bg: #000;
-    --btn-radius: 12px;
-  }
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, sans-serif;
+    }
 
-  *{box-sizing: border-box;}
-  html,body{height:100%;margin:0;background:var(--bg);font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-  /* container de cada "página" */
-  .page{
-    position:fixed;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .7s ease;
-    background:var(--bg);
-  }
-  .page.active{
-    opacity:1;
-    pointer-events:all;
-  }
+    .page {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.8s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000;
+    }
 
-  /* imagens/video/pdf ocupam toda a tela */
-  .media{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
+    .page.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
 
-  /* capa clicável ocupa tudo e tem cursor pointer */
-  .cover-click{
-    width:100%;
-    height:100%;
-    cursor:pointer;
-    display:block;
-  }
+    img, video {
+        max-width: 100%;
+        max-height: 100%;
+    }
 
-  /* botão genérico (usado na página 3 se precisar) */
-  .btn{
-    position:absolute;
-    z-index:50;
-    padding:12px 18px;
-    background:var(--accent);
-    color:#fff;
-    border:0;
-    border-radius:var(--btn-radius);
-    font-size:16px;
-    cursor:pointer;
-    box-shadow:0 6px 18px rgba(0,0,0,.3);
-  }
+    .btn {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 14px 26px;
+        border-radius: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        font-weight: bold;
+    }
 
-  /* botão circular X (Página 4) */
-  .btn-x{
-    position:absolute;
-    top:20px;
-    right:20px;
-    z-index:120;
-    width:64px;
-    height:64px;
-    border-radius:50%;
-    border:3px solid rgba(255,255,255,.95);
-    background:rgba(0,0,0,.45);
-    color:#fff;
-    font-weight:700;
-    font-size:28px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-  }
-
-  /* camada de brilho (flash) */
-  #flash{
-    position:fixed;
-    inset:0;
-    background:#fff;
-    opacity:0;
-    pointer-events:none;
-    z-index:200;
-    transition:opacity .35s ease-out;
-  }
-
-  /* iframe que carrega o PDF deve estar acima para carregar interatividade */
-  iframe.pdf-frame, embed.pdf-embed{
-    width:100%;
-    height:100%;
-    border:0;
-    display:block;
-  }
-
-  /* responsividade menores */
-  @media (max-width:420px){
-    .btn{font-size:15px;padding:10px 14px;}
-    .btn-x{width:56px;height:56px;font-size:26px;top:14px;right:14px;}
-  }
+    .btn-small {
+        bottom: 20px;
+        padding: 10px 18px;
+        font-size: 16px;
+    }
 </style>
 </head>
+
 <body>
 
-<!-- ÁUDIO GLOBAL: audio.mp3 -->
-<audio id="bgMusic" autoplay loop>
-  <source src="audio.mp3" type="audio/mpeg">
-  <!-- fallback: nada -->
+<!-- ÁUDIO QUE SÓ TOCA DEPOIS DO CLIQUE (NÃO AUTOPLAY) -->
+<audio id="bgMusic" loop>
+    <source src="audio.mp3" type="audio/mpeg">
 </audio>
 
+<!-- PÁGINA 1 - CAPA -->
+<div id="page1" class="page active">
+    <img src="capa.png" id="capaImg" style="cursor:pointer;" />
+</div>
+
+<!-- PÁGINA 2 - VÍDEO -->
+<div id="page2" class="page">
+    <video id="mainVideo" playsinline webkit-playsinline muted>
+        <source src="video.mp4" type="video/mp4">
+    </video>
+
+    <div class="btn" onclick="openPage3()">Abrir Página 3</div>
+</div>
+
+<!-- PÁGINA 3 -->
+<div id="page3" class="page">
+    <div class="btn-small" onclick="openPDF3()">Abrir PDF Página 3</div>
+    <div class="btn-small" style="bottom:70px;" onclick="openPage4()">Ir para Página 4</div>
+</div>
+
+<!-- PÁGINA 4 -->
+<div id="page4" class="page">
+    <div class="btn-small" onclick="openPDF4()">Abrir PDF Página 4</div>
+    <div class="btn-small" style="bottom:70px;" onclick="openPage1()">Voltar ao início</div>
+</div>
+
 <script>
-/*
-  Estrutura de navegação por páginas:
-  - goToPage(n): ativa a div #page{n}
-*/
-function goToPage(n){
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page' + n);
-  if(target) target.classList.add('active');
+/* Transição entre páginas */
+function goToPage(num) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById("page" + num).classList.add("active");
 }
 
-/* efeito de brilho (flash) entre vídeo e abrir página 3 */
-function flashAndOpenPage3(){
-  const flash = document.getElementById('flash');
-  flash.style.opacity = '1';
-  // mantém o branco por 250ms e depois some e abre page3
-  setTimeout(() => {
-    flash.style.opacity = '0';
-    goToPage(3);
-  }, 280);
-}
-
-/* --- DETECÇÃO DE CLIQUE NO PDF (PÁGINA 3) ---
-   Requisito (Opção A): No seu PDF (pagina3.pdf) o botão "Sugestão de presentes"
-   deve abrir um link EXTERNO exatamente igual a:
-       https://abrir-pagina4.local
-   Quando o iframe carregar uma URL que contenha "abrir-pagina4" nós interceptamos,
-   impedimos a navegação permanente e abrimos a página 4 do site.
-*/
-const PDF_TRIGGER_KEY = 'abrir-pagina4'; // string que o link do PDF deve conter
-
-// Quando o iframe carregar algo, checamos o src atual.
-// Se for o trigger -> chamamos goToPage(4) e restauramos o iframe para o PDF.
-function watchPdfFrame(){
-  const frame = document.getElementById('pdfFrame');
-  if(!frame) return;
-
-  // flag para evitar loops ao definir src de volta
-  let handling = false;
-
-  frame.addEventListener('load', () => {
-    if(handling) return;
-    // tentamos ler frame.src (isso é seguro mesmo cross-origin; retorna a string do atributo src)
-    try {
-      const currentSrc = frame.getAttribute('src') || frame.src || '';
-      // Se a URL atual contiver nosso trigger, reagimos
-      if(currentSrc.includes(PDF_TRIGGER_KEY)){
-        handling = true;
-        // restaura o PDF original (volta a exibir o PDF)
-        setTimeout(() => {
-          frame.setAttribute('src', 'pagina3.pdf'); // restaura
-          // abre a página 4 do site
-          goToPage(4);
-          // libera o handler após um curto período
-          setTimeout(()=> handling = false, 300);
-        }, 60);
-      } else {
-        // Também tentamos inspecionar location do iframe para navegacões internas (pode falhar por cross-origin)
-        try {
-          const loc = frame.contentWindow.location.href || '';
-          if(loc.includes(PDF_TRIGGER_KEY)){
-            handling = true;
-            frame.setAttribute('src','pagina3.pdf');
-            goToPage(4);
-            setTimeout(()=> handling = false, 300);
-          }
-        } catch(e){
-          // cross-origin: não conseguimos ler contentWindow.location.href; ignoramos
-        }
-      }
-    } catch(err){
-      // qualquer erro não deve quebrar a experiência
-      console.warn('Erro ao checar pdfFrame load:', err);
-    }
-  });
-
-  // Observador de mudança do atributo src (caso a mudança não dispare outro load)
-  const mo = new MutationObserver(() => {
-    // dispara manualmente o mesmo check lendo o src
-    const currentSrc = frame.getAttribute('src') || frame.src || '';
-    if(currentSrc.includes(PDF_TRIGGER_KEY)){
-      frame.setAttribute('src','pagina3.pdf');
-      goToPage(4);
-    }
-  });
-  mo.observe(frame, { attributes: true, attributeFilter: ['src'] });
-}
-
-/* Inicializa tudo quando DOM estiver pronto */
-document.addEventListener('DOMContentLoaded', () => {
-  // garante que a page1 esteja ativa inicialmente
-  goToPage(1);
-  watchPdfFrame();
-
-  // proteção básica: se autoplay de audio for bloqueado, podemos tentar ligar ao primeiro toque
-  const audio = document.getElementById('bgMusic');
-  function tryPlayAudio(){
-    if(audio.paused){
-      audio.play().catch(()=>{/* se bloqueado, ignora */});
-    }
-    document.removeEventListener('click', tryPlayAudio);
-  }
-  document.addEventListener('click', tryPlayAudio, {once:true});
+/* Clique na capa */
+document.getElementById("capaImg").addEventListener("click", () => {
+    openPage2();
 });
+
+/* Página 2 com vídeo + música iniciando corretamente */
+function openPage2() {
+    goToPage(2);
+
+    // Toca a música somente após interação (evita bloqueio Android)
+    const audio = document.getElementById("bgMusic");
+    audio.play().catch(()=>{});
+
+    // Inicia o vídeo automaticamente
+    setTimeout(() => {
+        const v = document.getElementById("mainVideo");
+        v.muted = true;
+        v.play().catch(() => {
+            // Caso algum navegador ainda bloqueie, libera no próximo clique
+            document.body.addEventListener("click", () => {
+                v.play().catch(()=>{});
+            }, { once: true });
+        });
+    }, 200);
+}
+
+function openPage3() {
+    goToPage(3);
+}
+
+function openPage4() {
+    goToPage(4);
+}
+
+function openPage1() {
+    goToPage(1);
+}
+
+/* PDFs */
+function openPDF3() {
+    window.open("pagina3.pdf", "_blank");
+}
+
+function openPDF4() {
+    window.open("pagina4.pdf", "_blank");
+}
 </script>
-
-<!-- Camada de flash (efeito de brilho) -->
-<div id="flash" aria-hidden="true"></div>
-
-<!-- ========================= PÁGINA 1 - CAPA (clicável em toda a tela) ========================= -->
-<div id="page1" class="page active" role="region" aria-label="Capa">
-  <!-- Imagem da capa ocupa tudo; qualquer clique na capa leva para página 2 -->
-  <img src="capa.png" alt="Capa do convite" class="media cover-click"
-       onclick="goToPage(2)" />
-</div>
-
-<!-- ========================= PÁGINA 2 - VÍDEO ========================= -->
-<div id="page2" class="page" role="region" aria-label="Video">
-  <!-- video.mp4 -->
-  <video class="media" autoplay playsinline controlslist="nodownload" onended="flashAndOpenPage3()">
-    <source src="video.mp4" type="video/mp4">
-    Seu navegador não suporta vídeo.
-  </video>
-</div>
-
-<!-- ========================= PÁGINA 3 - PDF (iframe) ========================= -->
-<div id="page3" class="page" role="region" aria-label="Página 3 - PDF">
-  <!--
-    IMPORTANTE:
-    - O botão dentro do seu PDF (pagina3.pdf) deve abrir um link que contenha a string
-      definida em PDF_TRIGGER_KEY (por padrão "abrir-pagina4").
-    - Exemplo de URL para colocar no link do PDF:
-        https://abrir-pagina4.local
-  -->
-  <iframe id="pdfFrame" class="pdf-frame" src="pagina3.pdf" title="PDF da página 3"></iframe>
-  <!-- Observação: não colocamos botão HTML por cima; o acionamento vem do PDF -->
-</div>
-
-<!-- ========================= PÁGINA 4 - PDF com botão X ========================= -->
-<div id="page4" class="page" role="region" aria-label="Página 4 - PDF">
-  <!-- Aqui pode usar embed ou iframe; usamos embed para simplicidade -->
-  <embed class="pdf-embed" src="pagina4.pdf" type="application/pdf" />
-  <button class="btn-x" aria-label="Fechar" onclick="goToPage(3)">X</button>
-</div>
 
 </body>
 </html>

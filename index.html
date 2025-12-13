@@ -32,7 +32,7 @@ body {
     pointer-events: auto;
 }
 
-img, video {
+img, video, iframe {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -54,17 +54,16 @@ img, video {
     align-items: center;
     cursor: pointer;
     user-select: none;
+    z-index: 10;
 }
 
-.close-btn:active {
-    transform: scale(0.92);
-}
+.close-btn:active { transform: scale(0.92); }
 </style>
 </head>
 
 <body>
 
-<!-- MÚSICA EM LOOP (VIDEO oculto para evitar player externo Android) -->
+<!-- MÚSICA EM LOOP (vídeo oculto – não gera player externo) -->
 <video id="bgMusic" loop playsinline webkit-playsinline muted style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
@@ -81,10 +80,9 @@ img, video {
     </video>
 </div>
 
-<!-- PÁGINA 3 – PDF -->
+<!-- PÁGINA 3 – PDF (abre automaticamente, sem permissão) -->
 <div id="page3" class="page">
-    <!-- PDF aberto diretamente sem redirecionamento externo -->
-    <iframe src="pagina3.pdf" style="width:100%;height:100%;border:none"></iframe>
+    <iframe src="pagina3.pdf"></iframe>
 </div>
 
 <!-- PÁGINA 4 -->
@@ -103,29 +101,31 @@ function goToPage(num) {
     if (page) page.classList.add('active');
 }
 
-/* Clique na capa */
+/* Clique na capa – única interação do usuário */
 document.getElementById('capaImg').addEventListener('click', () => {
     goToPage(2);
 
-    // inicia música
+    // inicia música SEM pedir permissão novamente
     music.muted = false;
-    music.play().catch(() => {});
+    music.play().catch(()=>{});
 
     // inicia vídeo
     video.currentTime = 0;
-    setTimeout(() => video.play().catch(()=>{}), 150);
+    setTimeout(() => video.play().catch(()=>{}), 120);
 });
 
-/* FINAL DO VÍDEO → ABRE PÁGINA 3 (PDF) */
-video.addEventListener('ended', () => {
+/* Final do vídeo → abre Página 3 AUTOMÁTICO */
+function goToPDF() {
     goToPage(3);
-});
+}
 
-/* fallback absoluto */
+video.addEventListener('ended', goToPDF);
+
+/* fallback absoluto (caso ended não dispare) */
 video.addEventListener('timeupdate', () => {
     if (video.duration && video.currentTime >= video.duration - 0.15) {
         if (!document.getElementById('page3').classList.contains('active')) {
-            goToPage(3);
+            goToPDF();
         }
     }
 });

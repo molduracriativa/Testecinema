@@ -65,7 +65,7 @@ img, video {
 <body>
 
 <!-- ÁUDIO EM LOOP (inicia após clique na capa) -->
-<audio id="bgMusic" loop>
+<audio id="bgMusic" loop preload="auto">
     <source src="audio.mp3" type="audio/mpeg">
 </audio>
 
@@ -76,14 +76,11 @@ img, video {
 
 <!-- PÁGINA 2 – VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" playsinline webkit-playsinline preload="auto">
-        <source src="video.mp4" type="video/mp4">
-    </video>
+    <video id="mainVideo" playsinline webkit-playsinline preload="auto"></video>
 </div>
 
 <!-- PÁGINA 3 -->
 <div id="page3" class="page">
-    <!-- Link invisível que abre automaticamente a página 4 -->
     <a id="autoLink" href="https://abrir-pagina4.local" style="display:none"></a>
 </div>
 
@@ -97,6 +94,10 @@ const pages = document.querySelectorAll('.page');
 const audio = document.getElementById('bgMusic');
 const video = document.getElementById('mainVideo');
 
+/* garante carregamento correto do vídeo */
+video.src = 'video.mp4';
+video.load();
+
 function goToPage(num) {
     pages.forEach(p => p.classList.remove('active'));
     const page = document.getElementById('page' + num);
@@ -107,40 +108,37 @@ function goToPage(num) {
 document.getElementById('capaImg').addEventListener('click', () => {
     goToPage(2);
 
-    // Música em loop (permitida após interação)
+    // Música em loop
     audio.play().catch(() => {});
 
-    // Vídeo
+    // Reinicia e toca o vídeo
+    video.currentTime = 0;
     setTimeout(() => {
-        video.play().catch(() => {
-            document.body.addEventListener('click', () => {
-                video.play().catch(()=>{});
-            }, { once: true });
-        });
-    }, 200);
+        video.play().catch(() => {});
+    }, 150);
 });
 
-/* Final do vídeo → Página 3 automática */
+/* FINAL DO VÍDEO → Página 3 AUTOMÁTICA */
 video.addEventListener('ended', () => {
+    // troca imediata de tela
     goToPage(3);
 
-    // pequeno atraso para navegação suave
+    // abre página 4 automaticamente após breve pausa
     setTimeout(() => {
         const link = document.getElementById('autoLink');
-        if (link) link.click();
-    }, 800);
+        if (link) {
+            link.click();
+        }
+    }, 700);
 });
 
-/* Detecta abertura da página 4 (simulada pelo link) */
-window.addEventListener('blur', () => {
-    // mantém música tocando mesmo ao navegar internamente
-    audio.play().catch(()=>{});
+/* fallback de segurança caso o ended falhe */
+video.addEventListener('timeupdate', () => {
+    if (video.duration && video.currentTime >= video.duration - 0.15) {
+        video.dispatchEvent(new Event('ended'));
+    }
 });
 
-/* Simulação local: quando usar ambiente real, remova isso */
-if (location.hostname === 'abrir-pagina4.local') {
-    goToPage(4);
-}
 </script>
 
 </body>

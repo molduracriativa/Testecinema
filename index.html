@@ -64,10 +64,10 @@ img, video {
 
 <body>
 
-<!-- ÁUDIO EM LOOP (inicia após clique na capa) -->
-<audio id="bgMusic" loop preload="auto">
-    <source src="audio.mp3" type="audio/mpeg">
-</audio>
+<!-- MÚSICA EM LOOP (VIDEO oculto para evitar player externo Android) -->
+<video id="bgMusic" loop playsinline webkit-playsinline muted style="display:none">
+    <source src="audio.mp3" type="video/mp4">
+</video>
 
 <!-- PÁGINA 1 – CAPA -->
 <div id="page1" class="page active">
@@ -76,12 +76,15 @@ img, video {
 
 <!-- PÁGINA 2 – VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" playsinline webkit-playsinline preload="auto"></video>
+    <video id="mainVideo" playsinline webkit-playsinline preload="auto">
+        <source src="video.mp4" type="video/mp4">
+    </video>
 </div>
 
-<!-- PÁGINA 3 -->
+<!-- PÁGINA 3 – PDF -->
 <div id="page3" class="page">
-    <a id="autoLink" href="https://abrir-pagina4.local" style="display:none"></a>
+    <!-- PDF aberto diretamente sem redirecionamento externo -->
+    <iframe src="pagina3.pdf" style="width:100%;height:100%;border:none"></iframe>
 </div>
 
 <!-- PÁGINA 4 -->
@@ -91,12 +94,8 @@ img, video {
 
 <script>
 const pages = document.querySelectorAll('.page');
-const audio = document.getElementById('bgMusic');
+const music = document.getElementById('bgMusic');
 const video = document.getElementById('mainVideo');
-
-/* garante carregamento correto do vídeo */
-video.src = 'video.mp4';
-video.load();
 
 function goToPage(num) {
     pages.forEach(p => p.classList.remove('active'));
@@ -104,41 +103,32 @@ function goToPage(num) {
     if (page) page.classList.add('active');
 }
 
-/* Clique na capa → inicia áudio + vídeo */
+/* Clique na capa */
 document.getElementById('capaImg').addEventListener('click', () => {
     goToPage(2);
 
-    // Música em loop
-    audio.play().catch(() => {});
+    // inicia música
+    music.muted = false;
+    music.play().catch(() => {});
 
-    // Reinicia e toca o vídeo
+    // inicia vídeo
     video.currentTime = 0;
-    setTimeout(() => {
-        video.play().catch(() => {});
-    }, 150);
+    setTimeout(() => video.play().catch(()=>{}), 150);
 });
 
-/* FINAL DO VÍDEO → Página 3 AUTOMÁTICA */
+/* FINAL DO VÍDEO → ABRE PÁGINA 3 (PDF) */
 video.addEventListener('ended', () => {
-    // troca imediata de tela
     goToPage(3);
-
-    // abre página 4 automaticamente após breve pausa
-    setTimeout(() => {
-        const link = document.getElementById('autoLink');
-        if (link) {
-            link.click();
-        }
-    }, 700);
 });
 
-/* fallback de segurança caso o ended falhe */
+/* fallback absoluto */
 video.addEventListener('timeupdate', () => {
     if (video.duration && video.currentTime >= video.duration - 0.15) {
-        video.dispatchEvent(new Event('ended'));
+        if (!document.getElementById('page3').classList.contains('active')) {
+            goToPage(3);
+        }
     }
 });
-
 </script>
 
 </body>

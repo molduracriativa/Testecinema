@@ -6,32 +6,25 @@
 <title>Convite Interativo</title>
 
 <style>
-:root {
-    --btn-bg: #ffffff;
-    --btn-color: #000000;
-}
-
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
-    overflow: hidden;
     background: #000;
+    overflow: hidden;
     font-family: Arial, sans-serif;
 }
 
 .page {
     position: fixed;
     inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.6s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease-in-out;
 }
 
 .page.active {
@@ -42,70 +35,61 @@ body {
 img, video {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* evita cortes */
+    object-fit: contain;
 }
 
-.btn {
+/* Botão fechar (Página 4) */
+.close-btn {
     position: absolute;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--btn-bg);
-    color: var(--btn-color);
-    padding: 14px 26px;
-    border-radius: 14px;
-    font-size: 18px;
+    top: 20px;
+    right: 20px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.85);
+    color: #000;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
-    font-weight: bold;
     user-select: none;
 }
 
-.btn:active {
-    transform: translateX(-50%) scale(0.97);
-}
-
-.btn-small {
-    padding: 10px 18px;
-    font-size: 16px;
-}
-
-.safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
+.close-btn:active {
+    transform: scale(0.92);
 }
 </style>
 </head>
 
 <body>
 
-<!-- ÁUDIO (inicia somente após interação) -->
-<audio id="bgMusic" loop preload="none">
+<!-- ÁUDIO EM LOOP (inicia após clique na capa) -->
+<audio id="bgMusic" loop>
     <source src="audio.mp3" type="audio/mpeg">
 </audio>
 
 <!-- PÁGINA 1 – CAPA -->
 <div id="page1" class="page active">
-    <img src="capa.png" id="capaImg" alt="Capa do convite" style="cursor:pointer;" />
+    <img src="capa.png" id="capaImg" alt="Capa" style="cursor:pointer;" />
 </div>
 
 <!-- PÁGINA 2 – VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" playsinline webkit-playsinline muted preload="metadata">
+    <video id="mainVideo" playsinline webkit-playsinline preload="auto">
         <source src="video.mp4" type="video/mp4">
     </video>
-
-    <div class="btn safe-bottom" onclick="goToPage(3)">Abrir Página 3</div>
 </div>
 
 <!-- PÁGINA 3 -->
 <div id="page3" class="page">
-    <div class="btn btn-small safe-bottom" onclick="openPDF('pagina3.pdf')">Abrir PDF Página 3</div>
-    <div class="btn btn-small" style="bottom:90px;" onclick="goToPage(4)">Ir para Página 4</div>
+    <!-- Link invisível que abre automaticamente a página 4 -->
+    <a id="autoLink" href="https://abrir-pagina4.local" style="display:none"></a>
 </div>
 
 <!-- PÁGINA 4 -->
 <div id="page4" class="page">
-    <div class="btn btn-small safe-bottom" onclick="openPDF('pagina4.pdf')">Abrir PDF Página 4</div>
-    <div class="btn btn-small" style="bottom:90px;" onclick="goToPage(1)">Voltar ao início</div>
+    <div class="close-btn" onclick="goToPage(3)">✕</div>
 </div>
 
 <script>
@@ -117,35 +101,45 @@ function goToPage(num) {
     pages.forEach(p => p.classList.remove('active'));
     const page = document.getElementById('page' + num);
     if (page) page.classList.add('active');
-
-    // pausa vídeo quando sai da página 2
-    if (num !== 2 && video) {
-        video.pause();
-    }
 }
 
-// Clique na capa
-const capa = document.getElementById('capaImg');
-if (capa) {
-    capa.addEventListener('click', () => {
-        goToPage(2);
+/* Clique na capa → inicia áudio + vídeo */
+document.getElementById('capaImg').addEventListener('click', () => {
+    goToPage(2);
 
-        // áudio
-        audio.play().catch(() => {});
+    // Música em loop (permitida após interação)
+    audio.play().catch(() => {});
 
-        // vídeo
-        setTimeout(() => {
-            video.play().catch(() => {
-                document.body.addEventListener('click', () => {
-                    video.play().catch(()=>{});
-                }, { once: true });
-            });
-        }, 200);
-    });
-}
+    // Vídeo
+    setTimeout(() => {
+        video.play().catch(() => {
+            document.body.addEventListener('click', () => {
+                video.play().catch(()=>{});
+            }, { once: true });
+        });
+    }, 200);
+});
 
-function openPDF(file) {
-    window.open(file, '_blank');
+/* Final do vídeo → Página 3 automática */
+video.addEventListener('ended', () => {
+    goToPage(3);
+
+    // pequeno atraso para navegação suave
+    setTimeout(() => {
+        const link = document.getElementById('autoLink');
+        if (link) link.click();
+    }, 800);
+});
+
+/* Detecta abertura da página 4 (simulada pelo link) */
+window.addEventListener('blur', () => {
+    // mantém música tocando mesmo ao navegar internamente
+    audio.play().catch(()=>{});
+});
+
+/* Simulação local: quando usar ambiente real, remova isso */
+if (location.hostname === 'abrir-pagina4.local') {
+    goToPage(4);
 }
 </script>
 

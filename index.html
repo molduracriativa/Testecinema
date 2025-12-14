@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convite</title>
+<title>Convite Interativo</title>
 
 <style>
 body {
@@ -30,7 +30,13 @@ img, video {
     object-fit: contain;
 }
 
-/* tela abrir */
+/* tela invisível para áudio */
+#start {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+}
+
 .bg {
     width: 100%;
     height: 100%;
@@ -60,13 +66,14 @@ img, video {
 <body>
 
 <!-- ÁUDIO (loop invisível) -->
-<video id="music" loop muted playsinline style="display:none">
-    <source src="audio.mp3" type="video/mp4">
-</video>
+<audio id="bgMusic" loop preload="auto">
+    <source src="audio.mp3" type="audio/mpeg">
+</audio>
 
 <!-- CAPA -->
 <div id="p1" class="page active">
-    <img src="capa.png" id="start">
+    <img src="capa.png" style="width:100%;height:100%;object-fit:contain;">
+    <div id="start"></div>
 </div>
 
 <!-- VIDEO -->
@@ -93,7 +100,7 @@ img, video {
 </div>
 
 <script>
-const music = document.getElementById('music');
+const music = document.getElementById('bgMusic');
 const video = document.getElementById('video');
 
 function show(n) {
@@ -102,12 +109,17 @@ function show(n) {
 }
 
 /* CAPA */
-document.getElementById('start').onclick = () => {
-    music.muted = false;
-    music.play().catch(()=>{});
+document.getElementById('start').addEventListener('click', () => {
+
+    // Iniciar áudio
+    const audio = document.getElementById('bgMusic');
+    audio.volume = 1;
+    audio.play().catch(() => {});
+
+    // Ir para o vídeo
     show(2);
-    video.play().catch(()=>{});
-};
+    video.play().catch(() => {});
+}, { once:true });
 
 /* FINAL DO VIDEO */
 video.onended = () => {

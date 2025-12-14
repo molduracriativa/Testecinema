@@ -2,34 +2,27 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Convite Interativo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convite</title>
 
 <style>
-* { box-sizing: border-box; }
-
 body {
     margin: 0;
     background: #000;
     overflow: hidden;
-    font-family: Arial, sans-serif;
 }
 
 .page {
     position: fixed;
     inset: 0;
-    background: #000;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .6s ease;
+    background: #000;
 }
 
 .page.active {
-    opacity: 1;
-    pointer-events: auto;
+    display: flex;
 }
 
 img, video {
@@ -38,107 +31,83 @@ img, video {
     object-fit: contain;
 }
 
-/* BOTÃO X */
-.close-btn {
+/* botão X */
+.close {
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
+    background: #fff;
     border-radius: 50%;
-    background: rgba(255,255,255,.9);
-    color: #000;
     font-size: 22px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    z-index: 10;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ÁUDIO EM LOOP (SEM PLAYER EXTERNO) -->
-<video id="bgMusic" loop muted playsinline webkit-playsinline style="display:none">
+<!-- áudio invisível -->
+<video id="music" loop muted playsinline style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
 
 <!-- CAPA -->
-<div id="page1" class="page active">
-    <img src="capa.png" id="capaImg" style="cursor:pointer;">
+<div id="p1" class="page active">
+    <img src="capa.png" id="start">
 </div>
 
-<!-- VÍDEO -->
-<div id="page2" class="page">
-    <video id="mainVideo"
-           muted
-           autoplay
-           playsinline
-           webkit-playsinline
-           preload="auto">
+<!-- VIDEO -->
+<div id="p2" class="page">
+    <video id="video" autoplay muted playsinline>
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
 <!-- ABRIR -->
-<div id="page3" class="page">
-    <img src="abrir.png" id="abrirBtn" style="cursor:pointer;">
+<div id="p3" class="page">
+    <img src="abrir.png" id="btnAbrir">
 </div>
 
 <!-- PAGINA 3 -->
-<div id="page4" class="page">
-    <img src="pagina3.png" id="openSugestao" style="cursor:pointer;">
+<div id="p4" class="page">
+    <img src="pagina3.png" id="btnSugestao">
 </div>
 
-<!-- SUGESTÃO -->
-<div id="page5" class="page">
+<!-- SUGESTAO -->
+<div id="p5" class="page">
     <img src="sugestao.png">
-    <div class="close-btn" onclick="goToPage(4)">✕</div>
+    <div class="close" onclick="show(4)">✕</div>
 </div>
 
 <script>
-const pages = document.querySelectorAll('.page');
-const music = document.getElementById('bgMusic');
-const video = document.getElementById('mainVideo');
+const music = document.getElementById('music');
+const video = document.getElementById('video');
 
-function goToPage(n) {
-    pages.forEach(p => p.classList.remove('active'));
-    document.getElementById('page' + n).classList.add('active');
+function show(n) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('p' + n).classList.add('active');
 }
 
-/* CAPA → VÍDEO */
-document.getElementById('capaImg').onclick = () => {
-
-    // áudio
+/* capa */
+document.getElementById('start').onclick = () => {
     music.muted = false;
     music.play().catch(()=>{});
-
-    // ativa página do vídeo
-    goToPage(2);
-
-    // garante que o navegador reconheceu o vídeo visível
-    requestAnimationFrame(() => {
-        video.currentTime = 0;
-        video.play().catch(()=>{});
-    });
+    show(2);
 };
 
-/* FIM DO VÍDEO */
-video.onended = () => {
-    goToPage(3);
-};
+/* fim do vídeo */
+video.onended = () => show(3);
 
-/* ABRIR → PAGINA 3 */
-document.getElementById('abrirBtn').onclick = () => {
-    goToPage(4);
-};
+/* abrir */
+document.getElementById('btnAbrir').onclick = () => show(4);
 
-/* PAGINA 3 → SUGESTÃO */
-document.getElementById('openSugestao').onclick = () => {
-    goToPage(5);
-};
+/* sugestão */
+document.getElementById('btnSugestao').onclick = () => show(5);
 </script>
 
 </body>

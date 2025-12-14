@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convite Interativo</title>
+<title>Convite</title>
 
 <style>
 body {
@@ -12,7 +12,6 @@ body {
     overflow: hidden;
 }
 
-/* páginas */
 .page {
     position: fixed;
     inset: 0;
@@ -31,7 +30,7 @@ img, video {
     object-fit: contain;
 }
 
-/* tela abrir com fundo */
+/* tela abrir */
 .bg {
     width: 100%;
     height: 100%;
@@ -47,7 +46,7 @@ img, video {
     right: 16px;
     width: 38px;
     height: 38px;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,.9);
     border-radius: 50%;
     font-size: 22px;
     display: flex;
@@ -60,7 +59,7 @@ img, video {
 
 <body>
 
-<!-- áudio invisível (loop) -->
+<!-- ÁUDIO (loop invisível) -->
 <video id="music" loop muted playsinline style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
@@ -72,25 +71,25 @@ img, video {
 
 <!-- VIDEO -->
 <div id="p2" class="page">
-    <video id="video" muted playsinline preload="auto">
+    <video id="video" muted playsinline>
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
 <!-- ABRIR -->
 <div id="p3" class="page">
-    <div class="bg" id="btnAbrir" style="background-image:url('abrir.png')"></div>
+    <div class="bg" id="abrir" style="background-image:url('abrir.png')"></div>
 </div>
 
-<!-- PAGINA 3 -->
+<!-- PAGINA 3 (imagem com botão) -->
 <div id="p4" class="page">
-    <img src="pagina3.png" id="btnSugestao">
+    <img src="pagina3.png" id="openSugestao">
 </div>
 
-<!-- SUGESTAO -->
+<!-- SUGESTÃO -->
 <div id="p5" class="page">
     <img src="sugestao.png">
-    <div class="close" id="closeSugestao">✕</div>
+    <div class="close" id="voltar">✕</div>
 </div>
 
 <script>
@@ -106,29 +105,28 @@ function show(n) {
 document.getElementById('start').onclick = () => {
     music.muted = false;
     music.play().catch(()=>{});
-
     show(2);
-    video.currentTime = 0;
     video.play().catch(()=>{});
 };
 
-/* FINAL DO VIDEO → ABRIR */
-video.addEventListener('ended', () => {
+/* FINAL DO VIDEO */
+video.onended = () => {
     show(3);
-});
+};
 
-/* ABRIR → PAGINA 3 */
-document.getElementById('btnAbrir').onclick = () => {
+/* ABRIR → PDF + CONTINUA FLUXO */
+document.getElementById('abrir').onclick = () => {
+    window.open('pagina3.pdf', '_blank');
     show(4);
 };
 
-/* PAGINA 3 → SUGESTAO */
-document.getElementById('btnSugestao').onclick = () => {
+/* PAGINA 3 → SUGESTÃO */
+document.getElementById('openSugestao').onclick = () => {
     show(5);
 };
 
 /* VOLTAR */
-document.getElementById('closeSugestao').onclick = () => {
+document.getElementById('voltar').onclick = () => {
     show(4);
 };
 </script>

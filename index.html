@@ -24,7 +24,7 @@ body {
     align-items: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.8s ease;
+    transition: opacity .6s ease;
 }
 
 .page.active {
@@ -41,12 +41,12 @@ img, video {
 /* BOTÃO X */
 .close-btn {
     position: absolute;
-    top: 18px;
-    right: 18px;
-    width: 40px;
-    height: 40px;
+    top: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,.9);
     color: #000;
     font-size: 22px;
     display: flex;
@@ -60,34 +60,39 @@ img, video {
 
 <body>
 
-<!-- ÁUDIO EM LOOP (vídeo oculto – sem player externo) -->
-<video id="bgMusic" loop playsinline webkit-playsinline muted preload="auto" style="display:none">
+<!-- ÁUDIO EM LOOP (SEM PLAYER EXTERNO) -->
+<video id="bgMusic" loop muted playsinline webkit-playsinline style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
 
-<!-- PÁGINA 1 – CAPA -->
+<!-- CAPA -->
 <div id="page1" class="page active">
     <img src="capa.png" id="capaImg" style="cursor:pointer;">
 </div>
 
-<!-- PÁGINA 2 – VÍDEO -->
+<!-- VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" muted playsinline webkit-playsinline preload="auto">
+    <video id="mainVideo"
+           muted
+           autoplay
+           playsinline
+           webkit-playsinline
+           preload="auto">
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
-<!-- PÁGINA 3 – ABRIR -->
+<!-- ABRIR -->
 <div id="page3" class="page">
     <img src="abrir.png" id="abrirBtn" style="cursor:pointer;">
 </div>
 
-<!-- PÁGINA 4 – PAGINA 3 -->
+<!-- PAGINA 3 -->
 <div id="page4" class="page">
     <img src="pagina3.png" id="openSugestao" style="cursor:pointer;">
 </div>
 
-<!-- PÁGINA 5 – SUGESTÃO -->
+<!-- SUGESTÃO -->
 <div id="page5" class="page">
     <img src="sugestao.png">
     <div class="close-btn" onclick="goToPage(4)">✕</div>
@@ -104,22 +109,26 @@ function goToPage(n) {
 }
 
 /* CAPA → VÍDEO */
-document.getElementById('capaImg').addEventListener('click', () => {
+document.getElementById('capaImg').onclick = () => {
 
-    // inicia áudio de fundo
+    // áudio
     music.muted = false;
     music.play().catch(()=>{});
 
-    // abre vídeo
+    // ativa página do vídeo
     goToPage(2);
-    video.currentTime = 0;
-    video.play().catch(()=>{});
-});
 
-/* FINAL DO VÍDEO → TELA ABRIR */
-video.addEventListener('ended', () => {
+    // garante que o navegador reconheceu o vídeo visível
+    requestAnimationFrame(() => {
+        video.currentTime = 0;
+        video.play().catch(()=>{});
+    });
+};
+
+/* FIM DO VÍDEO */
+video.onended = () => {
     goToPage(3);
-});
+};
 
 /* ABRIR → PAGINA 3 */
 document.getElementById('abrirBtn').onclick = () => {

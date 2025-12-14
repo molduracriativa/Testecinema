@@ -24,7 +24,7 @@ body {
     align-items: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.9s ease;
+    transition: opacity 0.8s ease;
 }
 
 .page.active {
@@ -41,14 +41,14 @@ img, video {
 /* BOTÃO X */
 .close-btn {
     position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 42px;
-    height: 42px;
+    top: 18px;
+    right: 18px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(255,255,255,0.9);
     color: #000;
-    font-size: 24px;
+    font-size: 22px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -60,8 +60,8 @@ img, video {
 
 <body>
 
-<!-- ÁUDIO EM LOOP (SEM PLAYER EXTERNO) -->
-<video id="bgMusic" loop playsinline webkit-playsinline muted style="display:none">
+<!-- ÁUDIO EM LOOP (vídeo oculto – sem player externo) -->
+<video id="bgMusic" loop playsinline webkit-playsinline muted preload="auto" style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
 
@@ -72,17 +72,17 @@ img, video {
 
 <!-- PÁGINA 2 – VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" playsinline webkit-playsinline>
+    <video id="mainVideo" muted playsinline webkit-playsinline preload="auto">
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
-<!-- PÁGINA 3 – TELA ABRIR -->
+<!-- PÁGINA 3 – ABRIR -->
 <div id="page3" class="page">
     <img src="abrir.png" id="abrirBtn" style="cursor:pointer;">
 </div>
 
-<!-- PÁGINA 4 – PAGINA 3 (IMAGEM) -->
+<!-- PÁGINA 4 – PAGINA 3 -->
 <div id="page4" class="page">
     <img src="pagina3.png" id="openSugestao" style="cursor:pointer;">
 </div>
@@ -103,19 +103,23 @@ function goToPage(n) {
     document.getElementById('page' + n).classList.add('active');
 }
 
-/* CAPA → VÍDEO + ÁUDIO */
-document.getElementById('capaImg').onclick = () => {
+/* CAPA → VÍDEO */
+document.getElementById('capaImg').addEventListener('click', () => {
+
+    // inicia áudio de fundo
     music.muted = false;
     music.play().catch(()=>{});
+
+    // abre vídeo
     goToPage(2);
     video.currentTime = 0;
     video.play().catch(()=>{});
-};
+});
 
-/* FIM DO VÍDEO → TELA ABRIR */
-video.onended = () => {
+/* FINAL DO VÍDEO → TELA ABRIR */
+video.addEventListener('ended', () => {
     goToPage(3);
-};
+});
 
 /* ABRIR → PAGINA 3 */
 document.getElementById('abrirBtn').onclick = () => {

@@ -12,7 +12,6 @@ body {
     overflow: hidden;
 }
 
-/* páginas */
 .page {
     position: fixed;
     inset: 0;
@@ -31,7 +30,7 @@ img, video {
     object-fit: contain;
 }
 
-/* hotspot capa */
+/* hotspot total */
 #start {
     position: absolute;
     inset: 0;
@@ -46,23 +45,6 @@ img, video {
     background-position: center;
     cursor: pointer;
 }
-
-/* botão play */
-.play {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 44px;
-    height: 44px;
-    background: rgba(255,255,255,.9);
-    border-radius: 50%;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-}
 </style>
 </head>
 
@@ -76,7 +58,6 @@ img, video {
 <!-- CAPA -->
 <div id="p1" class="page active">
     <img src="capa.png">
-    <div class="play" id="playBtn">▶</div>
     <div id="start"></div>
 </div>
 
@@ -98,7 +79,7 @@ img, video {
 </div>
 
 <script>
-const music = document.getElementById('bgMusic');
+const audio = document.getElementById('bgMusic');
 const video = document.getElementById('video');
 
 function show(n) {
@@ -106,18 +87,16 @@ function show(n) {
     document.getElementById('p' + n).classList.add('active');
 }
 
-/* PLAY DO ÁUDIO */
-document.getElementById('playBtn').onclick = (e) => {
-    e.stopPropagation();
-    music.volume = 1;
-    music.play().catch(()=>{});
-    document.getElementById('playBtn').style.display = 'none';
-};
-
-/* CAPA → VIDEO */
+/* CLIQUE ÚNICO – DESBLOQUEIA TUDO */
 document.getElementById('start').addEventListener('click', () => {
+
+    audio.volume = 1;
+    audio.play().catch(()=>{});
+
     show(2);
+
     video.play().catch(()=>{});
+
 }, { once:true });
 
 /* FINAL DO VIDEO */
@@ -125,7 +104,7 @@ video.onended = () => {
     show(3);
 };
 
-/* ABRIR → PDF */
+/* ABRIR PDF */
 document.getElementById('abrir').onclick = () => {
     window.open('pagina3.pdf', '_blank');
     show(4);

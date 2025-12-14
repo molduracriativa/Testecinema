@@ -19,10 +19,16 @@ body {
     display: none;
     justify-content: center;
     align-items: center;
+    
+    /* NOVO: Propriedade para Transição Suave */
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out; /* Transiciona a opacidade em 0.5s */
 }
 
 .page.active {
     display: flex;
+    /* NOVO: Aumenta a opacidade para mostrar a página */
+    opacity: 1;
 }
 
 img, video {
@@ -51,7 +57,7 @@ img, video {
 /* Isso garante que a imagem do fundo p3 seja carregada mais cedo. */
 .bg-preload {
     background-image: url('abrir.png');
-    display: none; /* Mantém a div invisível */
+    display: none; 
 }
 </style>
 </head>
@@ -92,16 +98,41 @@ img, video {
 <script>
 const audio = document.getElementById('bgMusic');
 const video = document.getElementById('video');
+const pages = document.querySelectorAll('.page');
 
 function show(n) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('p' + n).classList.add('active');
+    // 1. Remove a classe 'active' da página atual (inicia o fade-out)
+    pages.forEach(p => {
+        if (p.classList.contains('active')) {
+            p.classList.remove('active');
+        }
+    });
+
+    // 2. Aguarda um curto período de tempo para permitir que o fade-out comece.
+    // Isso garante que a página antiga não desapareça instantaneamente.
+    setTimeout(() => {
+        // 3. Oculta todas as páginas (display: none)
+        pages.forEach(p => {
+            p.style.display = 'none';
+        });
+
+        // 4. Mostra a nova página e adiciona a classe 'active' (inicia o fade-in)
+        const nextPage = document.getElementById('p' + n);
+        if (nextPage) {
+            nextPage.style.display = 'flex';
+            // Necessário um pequeno atraso (0ms) ou requestAnimationFrame para garantir que a 
+            // mudança de display (de none para flex) ocorra antes de aplicar o opacity: 1
+            requestAnimationFrame(() => {
+                 nextPage.classList.add('active');
+            });
+        }
+    }, 10); // Atraso mínimo
+
 }
 
 /* CLIQUE ÚNICO – DESBLOQUEIA ÁUDIO + VÍDEO */
 document.getElementById('start').addEventListener('click', () => {
 
-    // Áudio
     audio.volume = 1; 
     audio.play().catch(error => {
         console.error("Falha ao iniciar o áudio:", error);
@@ -109,7 +140,6 @@ document.getElementById('start').addEventListener('click', () => {
 
     show(2);
 
-    // Vídeo
     video.play().catch(error => {
         console.error("Falha ao iniciar o vídeo:", error);
     });
@@ -118,7 +148,6 @@ document.getElementById('start').addEventListener('click', () => {
 
 /* FINAL DO VÍDEO */
 video.onended = () => {
-    // Como as imagens de p3 e p4 já estão pré-carregadas, a transição será mais rápida.
     show(3); 
 };
 

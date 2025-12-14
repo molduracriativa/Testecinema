@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Convite Interativo</title>
 
 <style>
@@ -18,13 +18,13 @@ body {
 .page {
     position: fixed;
     inset: 0;
+    background: #000;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.8s ease-in-out;
+    transition: opacity 0.9s ease;
 }
 
 .page.active {
@@ -32,13 +32,13 @@ body {
     pointer-events: auto;
 }
 
-img, video, iframe {
+img, video {
     width: 100%;
     height: 100%;
     object-fit: contain;
 }
 
-/* Botão fechar (Página 4) */
+/* BOTÃO X */
 .close-btn {
     position: absolute;
     top: 20px;
@@ -46,48 +46,51 @@ img, video, iframe {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.9);
     color: #000;
     font-size: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    user-select: none;
     z-index: 10;
 }
-
-.close-btn:active { transform: scale(0.92); }
 </style>
 </head>
 
 <body>
 
-<!-- MÚSICA EM LOOP (vídeo oculto – não gera player externo) -->
+<!-- ÁUDIO EM LOOP (SEM PLAYER EXTERNO) -->
 <video id="bgMusic" loop playsinline webkit-playsinline muted style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
 
 <!-- PÁGINA 1 – CAPA -->
 <div id="page1" class="page active">
-    <img src="capa.png" id="capaImg" alt="Capa" style="cursor:pointer;" />
+    <img src="capa.png" id="capaImg" style="cursor:pointer;">
 </div>
 
 <!-- PÁGINA 2 – VÍDEO -->
 <div id="page2" class="page">
-    <video id="mainVideo" playsinline webkit-playsinline preload="auto">
+    <video id="mainVideo" playsinline webkit-playsinline>
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
-<!-- PÁGINA 3 – PDF (abre automaticamente, sem permissão) -->
+<!-- PÁGINA 3 – TELA ABRIR -->
 <div id="page3" class="page">
-    <iframe src="pagina3.pdf"></iframe>
+    <img src="abrir.png" id="abrirBtn" style="cursor:pointer;">
 </div>
 
-<!-- PÁGINA 4 -->
+<!-- PÁGINA 4 – PAGINA 3 (IMAGEM) -->
 <div id="page4" class="page">
-    <div class="close-btn" onclick="goToPage(3)">✕</div>
+    <img src="pagina3.png" id="openSugestao" style="cursor:pointer;">
+</div>
+
+<!-- PÁGINA 5 – SUGESTÃO -->
+<div id="page5" class="page">
+    <img src="sugestao.png">
+    <div class="close-btn" onclick="goToPage(4)">✕</div>
 </div>
 
 <script>
@@ -95,40 +98,34 @@ const pages = document.querySelectorAll('.page');
 const music = document.getElementById('bgMusic');
 const video = document.getElementById('mainVideo');
 
-function goToPage(num) {
+function goToPage(n) {
     pages.forEach(p => p.classList.remove('active'));
-    const page = document.getElementById('page' + num);
-    if (page) page.classList.add('active');
+    document.getElementById('page' + n).classList.add('active');
 }
 
-/* Clique na capa – única interação do usuário */
-document.getElementById('capaImg').addEventListener('click', () => {
-    goToPage(2);
-
-    // inicia música SEM pedir permissão novamente
+/* CAPA → VÍDEO + ÁUDIO */
+document.getElementById('capaImg').onclick = () => {
     music.muted = false;
     music.play().catch(()=>{});
-
-    // inicia vídeo
+    goToPage(2);
     video.currentTime = 0;
-    setTimeout(() => video.play().catch(()=>{}), 120);
-});
+    video.play().catch(()=>{});
+};
 
-/* Final do vídeo → abre Página 3 AUTOMÁTICO */
-function goToPDF() {
+/* FIM DO VÍDEO → TELA ABRIR */
+video.onended = () => {
     goToPage(3);
-}
+};
 
-video.addEventListener('ended', goToPDF);
+/* ABRIR → PAGINA 3 */
+document.getElementById('abrirBtn').onclick = () => {
+    goToPage(4);
+};
 
-/* fallback absoluto (caso ended não dispare) */
-video.addEventListener('timeupdate', () => {
-    if (video.duration && video.currentTime >= video.duration - 0.15) {
-        if (!document.getElementById('page3').classList.contains('active')) {
-            goToPDF();
-        }
-    }
-});
+/* PAGINA 3 → SUGESTÃO */
+document.getElementById('openSugestao').onclick = () => {
+    goToPage(5);
+};
 </script>
 
 </body>

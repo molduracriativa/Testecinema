@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convite</title>
+<title>Convite Interativo</title>
 
 <style>
 body {
@@ -12,13 +12,13 @@ body {
     overflow: hidden;
 }
 
+/* páginas */
 .page {
     position: fixed;
     inset: 0;
     display: none;
     justify-content: center;
     align-items: center;
-    background: #000;
 }
 
 .page.active {
@@ -31,14 +31,23 @@ img, video {
     object-fit: contain;
 }
 
+/* tela abrir com fundo */
+.bg {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
 /* botão X */
 .close {
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 36px;
-    height: 36px;
-    background: #fff;
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.9);
     border-radius: 50%;
     font-size: 22px;
     display: flex;
@@ -51,7 +60,7 @@ img, video {
 
 <body>
 
-<!-- áudio invisível -->
+<!-- áudio invisível (loop) -->
 <video id="music" loop muted playsinline style="display:none">
     <source src="audio.mp3" type="video/mp4">
 </video>
@@ -63,14 +72,14 @@ img, video {
 
 <!-- VIDEO -->
 <div id="p2" class="page">
-    <video id="video" autoplay muted playsinline>
+    <video id="video" muted playsinline preload="auto">
         <source src="video.mp4" type="video/mp4">
     </video>
 </div>
 
 <!-- ABRIR -->
 <div id="p3" class="page">
-    <img src="abrir.png" id="btnAbrir">
+    <div class="bg" id="btnAbrir" style="background-image:url('abrir.png')"></div>
 </div>
 
 <!-- PAGINA 3 -->
@@ -81,7 +90,7 @@ img, video {
 <!-- SUGESTAO -->
 <div id="p5" class="page">
     <img src="sugestao.png">
-    <div class="close" onclick="show(4)">✕</div>
+    <div class="close" id="closeSugestao">✕</div>
 </div>
 
 <script>
@@ -93,21 +102,35 @@ function show(n) {
     document.getElementById('p' + n).classList.add('active');
 }
 
-/* capa */
+/* CAPA */
 document.getElementById('start').onclick = () => {
     music.muted = false;
     music.play().catch(()=>{});
+
     show(2);
+    video.currentTime = 0;
+    video.play().catch(()=>{});
 };
 
-/* fim do vídeo */
-video.onended = () => show(3);
+/* FINAL DO VIDEO → ABRIR */
+video.addEventListener('ended', () => {
+    show(3);
+});
 
-/* abrir */
-document.getElementById('btnAbrir').onclick = () => show(4);
+/* ABRIR → PAGINA 3 */
+document.getElementById('btnAbrir').onclick = () => {
+    show(4);
+};
 
-/* sugestão */
-document.getElementById('btnSugestao').onclick = () => show(5);
+/* PAGINA 3 → SUGESTAO */
+document.getElementById('btnSugestao').onclick = () => {
+    show(5);
+};
+
+/* VOLTAR */
+document.getElementById('closeSugestao').onclick = () => {
+    show(4);
+};
 </script>
 
 </body>

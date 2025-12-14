@@ -12,6 +12,7 @@ body {
     overflow: hidden;
 }
 
+/* páginas */
 .page {
     position: fixed;
     inset: 0;
@@ -30,13 +31,14 @@ img, video {
     object-fit: contain;
 }
 
-/* tela invisível para áudio */
+/* hotspot capa */
 #start {
     position: absolute;
     inset: 0;
     cursor: pointer;
 }
 
+/* tela abrir */
 .bg {
     width: 100%;
     height: 100%;
@@ -45,34 +47,36 @@ img, video {
     cursor: pointer;
 }
 
-/* botão X */
-.close {
+/* botão play */
+.play {
     position: absolute;
     top: 16px;
     right: 16px;
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     background: rgba(255,255,255,.9);
     border-radius: 50%;
-    font-size: 22px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    z-index: 10;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ÁUDIO (loop invisível) -->
+<!-- ÁUDIO -->
 <audio id="bgMusic" loop preload="auto">
     <source src="audio.mp3" type="audio/mpeg">
 </audio>
 
 <!-- CAPA -->
 <div id="p1" class="page active">
-    <img src="capa.png" style="width:100%;height:100%;object-fit:contain;">
+    <img src="capa.png">
+    <div class="play" id="playBtn">▶</div>
     <div id="start"></div>
 </div>
 
@@ -88,15 +92,9 @@ img, video {
     <div class="bg" id="abrir" style="background-image:url('abrir.png')"></div>
 </div>
 
-<!-- PAGINA 3 (imagem com botão) -->
+<!-- PAGINA 3 -->
 <div id="p4" class="page">
-    <img src="pagina3.png" id="openSugestao">
-</div>
-
-<!-- SUGESTÃO -->
-<div id="p5" class="page">
-    <img src="sugestao.png">
-    <div class="close" id="voltar">✕</div>
+    <img src="pagina3.png">
 </div>
 
 <script>
@@ -108,17 +106,18 @@ function show(n) {
     document.getElementById('p' + n).classList.add('active');
 }
 
-/* CAPA */
+/* PLAY DO ÁUDIO */
+document.getElementById('playBtn').onclick = (e) => {
+    e.stopPropagation();
+    music.volume = 1;
+    music.play().catch(()=>{});
+    document.getElementById('playBtn').style.display = 'none';
+};
+
+/* CAPA → VIDEO */
 document.getElementById('start').addEventListener('click', () => {
-
-    // Iniciar áudio
-    const audio = document.getElementById('bgMusic');
-    audio.volume = 1;
-    audio.play().catch(() => {});
-
-    // Ir para o vídeo
     show(2);
-    video.play().catch(() => {});
+    video.play().catch(()=>{});
 }, { once:true });
 
 /* FINAL DO VIDEO */
@@ -126,19 +125,9 @@ video.onended = () => {
     show(3);
 };
 
-/* ABRIR → PDF + CONTINUA FLUXO */
+/* ABRIR → PDF */
 document.getElementById('abrir').onclick = () => {
     window.open('pagina3.pdf', '_blank');
-    show(4);
-};
-
-/* PAGINA 3 → SUGESTÃO */
-document.getElementById('openSugestao').onclick = () => {
-    show(5);
-};
-
-/* VOLTAR */
-document.getElementById('voltar').onclick = () => {
     show(4);
 };
 </script>

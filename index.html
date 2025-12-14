@@ -46,6 +46,13 @@ img, video {
     background-position: center;
     cursor: pointer;
 }
+
+/* OTIMIZAÇÃO 1: Pré-carregamento da imagem 'abrir.png' via CSS */
+/* Isso garante que a imagem do fundo p3 seja carregada mais cedo. */
+.bg-preload {
+    background-image: url('abrir.png');
+    display: none; /* Mantém a div invisível */
+}
 </style>
 </head>
 
@@ -54,6 +61,12 @@ img, video {
 <audio id="bgMusic" loop preload="auto">
     <source src="audio.mp3" type="audio/mpeg">
 </audio>
+
+<div style="display: none;">
+    <img src="pagina3.png" alt="Pré-carregamento">
+    <img src="capa.png" alt="Pré-carregamento">
+</div>
+
 
 <div id="p1" class="page active">
     <img src="capa.png">
@@ -74,6 +87,8 @@ img, video {
     <img src="pagina3.png">
 </div>
 
+<div class="bg-preload"></div>
+
 <script>
 const audio = document.getElementById('bgMusic');
 const video = document.getElementById('video');
@@ -85,38 +100,31 @@ function show(n) {
 
 /* CLIQUE ÚNICO – DESBLOQUEIA ÁUDIO + VÍDEO */
 document.getElementById('start').addEventListener('click', () => {
-    
-    // Tenta reproduzir o áudio
-    audio.volume = 1; // Ajusta o volume
-    audio.play().then(() => {
-        console.log("Áudio iniciado com sucesso.");
-    }).catch(error => {
-        // Isso irá capturar se a reprodução falhar por qualquer motivo (ex: carregamento incompleto)
+
+    // Áudio
+    audio.volume = 1; 
+    audio.play().catch(error => {
         console.error("Falha ao iniciar o áudio:", error);
     });
 
     show(2);
 
-    // Tenta reproduzir o vídeo
-    video.play().then(() => {
-        console.log("Vídeo iniciado com sucesso.");
-    }).catch(error => {
+    // Vídeo
+    video.play().catch(error => {
         console.error("Falha ao iniciar o vídeo:", error);
-        // Se o vídeo falhar, talvez queira avançar mesmo assim, dependendo da necessidade
-        // show(3); 
     });
 
-}, { once:true }); // O { once:true } garante que o clique só funcione uma vez
+}, { once:true });
 
 /* FINAL DO VÍDEO */
 video.onended = () => {
-    show(3);
+    // Como as imagens de p3 e p4 já estão pré-carregadas, a transição será mais rápida.
+    show(3); 
 };
 
 /* ABRIR PDF */
 document.getElementById('abrir').onclick = () => {
-    // Certifique-se de que o arquivo 'pagina3.pdf' está no mesmo diretório!
-    window.open('pagina3.pdf', '_blank'); 
+    window.open('pagina3.pdf', '_blank');
     show(4);
 };
 </script>
